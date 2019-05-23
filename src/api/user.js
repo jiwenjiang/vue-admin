@@ -18,7 +18,6 @@ export function register(data) {
 
 export function getInfo(name) {
   const url = `/system/sysuser/name/${name}`
-  console.log('name', url)
   return request({
     url: url,
     method: 'get'

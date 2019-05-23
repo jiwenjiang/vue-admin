@@ -21,8 +21,22 @@ export function getPartnersList(data) {
 export function addPartners(data) {
   return request({
     url: '/system/syspartner/add',
-    method: 'get',
-    params: data
+    method: 'post',
+    data: data
   })
 }
 
+export function editPartners(data) {
+  return request({
+    url: '/system/syspartner/edit',
+    method: 'put',
+    data: data
+  })
+}
+
+export function deletePartners(data) {
+  return request({
+    url: `/system/syspartner/delete/${data}`,
+    method: 'delete',
+  })
+}

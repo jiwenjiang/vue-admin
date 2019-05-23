@@ -10,7 +10,7 @@
             v-model="listQuery.partner"
             class="filter-item"
             placeholder="选择"
-            style="width: 100%"
+            style="width: 120px"
             @change="forceChange"
           >
             <el-option
@@ -22,7 +22,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="选择时间">
-          <div style="width: 300px">
+          <div style="width: 290px">
             <el-col :span="11">
               <el-date-picker
                 v-model="listQuery.startTime"

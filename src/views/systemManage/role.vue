@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-form :inline="true" :model="listQuery" class="demo-form-inline" size="mini">
         <el-form-item label="角色名称">
-          <el-input v-model="listQuery.name" placeholder="请输入角色名称" style="width: 120px" />
+          <el-input v-model="listQuery.name" placeholder="请输入角色名称" style="width: 120px"/>
         </el-form-item>
         <el-form-item label="选择时间">
           <div style="width: 300px">
@@ -69,7 +69,7 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row.userId)">
+          <el-button size="mini" type="danger" @click="handleDelete(row.ruleId)">
             删除
           </el-button>
         </template>
@@ -89,15 +89,26 @@
         ref="dataForm"
         :rules="rules"
         :model="userForm"
-        label-position="left"
+        label-position="right"
         label-width="70px"
         style="width: 380px;"
       >
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="userForm.name" />
+        <el-form-item label="名称:" prop="name">
+          <el-input v-model="userForm.name"/>
         </el-form-item>
-        <el-form-item label="编码" prop="content">
-          <el-input v-model="userForm.content" />
+        <el-form-item label="编码:" prop="content">
+          <el-input v-model="userForm.content"/>
+        </el-form-item>
+        <el-form-item label="权限:" prop="authorityIdArr">
+          <!--<div class="auth-box">-->
+          <el-tree
+            :data="rolesAuth"
+            show-checkbox
+            node-key="authorityId"
+            ref="tree"
+            :props="defaultProps">
+          </el-tree>
+          <!--</div>-->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -113,10 +124,10 @@
 </template>
 
 <script>
-  import { getRolesList } from '@/api/role'
-  import { getPartners } from '@/api/partner'
+  import { getRolesList, roleAuth, addRole, editRole, deleteRole } from '@/api/role'
   import waves from '@/directive/waves' // waves directive
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+  import { treeData } from '@/utils/setTree'
 
   export default {
     name: 'ComplexTable',
@@ -142,31 +153,28 @@
         userForm: {
           id: undefined,
           name: '',
-          password: '',
-          realName: '',
-          phone: '',
-          partnerIdArr: '',
-          ruleIdArr: ''
+          content: '',
+          authorityIdArr: []
         },
         rules: {
-          userCode: [{ required: true, message: '账号必填', trigger: 'blur' }],
-          password: [{ required: true, message: '密码必填', trigger: 'blur' }],
-          realName: [{ required: true, message: '姓名必填', trigger: 'blur' }],
-          phone: [{ required: true, pattern: /^1[3|4|5|7|8|9][0-9]\d{8}$/, message: '输入正确的手机号', trigger: 'blur' }],
-          partnerIdArr: [{ required: true, message: '合作方必填', trigger: 'blur' }],
-          ruleIdArr: [{ required: true, message: '角色必填', trigger: 'blur' }]
+          name: [{ required: true, message: '名称必填', trigger: 'blur' }],
+          content: [{ required: true, message: '编码必填', trigger: 'blur' }]
         },
         dialogStatus: '添加',
         dialogFormVisible: false,
         roles: [],
         partners: [],
-        deleteUsers: ''
+        deleteUsers: '',
+        rolesAuth: [],
+        defaultProps: {
+          children: 'children',
+          label: 'name'
+        }
       }
     },
     created() {
       this.getList()
-      this.getRoles()
-      this.getPartners()
+      this.getRoleAuth()
     },
     methods: {
       async getList() {
@@ -184,17 +192,14 @@
         this.$forceUpdate()
       },
       handleSelectionChange(v) {
-        this.deleteUsers = v.reduce((total, curr) => total + curr.userId + ',', '')
+        this.deleteUsers = v.reduce((total, curr) => total + curr.ruleId + ',', '')
       },
       resetForm() {
         this.userForm = {
           id: undefined,
-          userCode: '',
-          password: '',
-          realName: '',
-          phone: '',
-          partnerIdArr: '',
-          ruleIdArr: ''
+          name: '',
+          content: '',
+          authorityIdArr: []
         }
       },
       handleCreate() {
@@ -203,40 +208,51 @@
         this.dialogFormVisible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
+          this.$refs.tree.setCheckedKeys([]);
         })
       },
       handleUpdate(row) {
         this.userForm = Object.assign({}, row)
-        this.userForm.partnerIdArr = row.partners[0].partnerId
-        this.userForm.ruleIdArr = row.rules[0].ruleId
         this.dialogStatus = '编辑'
         this.dialogFormVisible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
+          this.$refs.tree.setCheckedKeys(row.authorities.map(v => v.authorityId))
         })
       },
       submitForm() {
         this.$refs['dataForm'].validate((valid) => {
+          if (this.$refs.tree.getCheckedKeys().length > 0) {
+            this.userForm.authorityIdArr = this.$refs.tree.getCheckedKeys().join(',')
+          } else {
+            this.userForm.authorityIdArr = ','
+          }
           if (valid) {
             this.dialogStatus === '添加'
-              ? addUser(this.userForm).then(() => {
+              ? addRole(this.userForm).then(() => {
                 this.getList()
               })
-              : editUser(this.userForm).then(() => {
+              : editRole(this.userForm).then(() => {
                 this.getList()
               })
             this.dialogFormVisible = false
           }
         })
       },
-      async getRoles() {
-        const res = await getRoles()
-        this.roles = res
-      },
-      async getPartners() {
-        const res = await getPartners()
-        this.partners = res
+      async getRoleAuth() {
+        const res = await roleAuth()
+        this.rolesAuth = treeData(res)
       }
     }
   }
 </script>
+
+<style lang="scss" scoped>
+  .auth-box {
+    width: 100%;
+    padding: 10px;
+    background-color: #eeeeee;
+  }
+
+</style>
+

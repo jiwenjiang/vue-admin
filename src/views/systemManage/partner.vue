@@ -8,7 +8,7 @@
             clearable
             class="filter-item"
             placeholder="选择"
-            style="width: 100%"
+            style="width: 120px"
             @change="forceChange"
           >
             <el-option
@@ -24,7 +24,7 @@
             v-model="listQuery.programName"
             class="filter-item"
             placeholder="选择"
-            style="width: 100%"
+            style="width: 120px"
             @change="forceChange"
           >
             <el-option
@@ -36,7 +36,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="选择时间">
-          <div style="width: 300px">
+          <div style="width: 290px">
             <el-col :span="11">
               <el-date-picker
                 v-model="listQuery.startTime"
@@ -111,7 +111,7 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row.userId)">
+          <el-button size="mini" type="danger" @click="handleDelete(row.partnerId)">
             删除
           </el-button>
         </template>
@@ -136,10 +136,10 @@
         style="width: 420px;"
       >
         <el-form-item label="合作方名称:" prop="partnerName">
-          <el-input v-model="userForm.partnerName" />
+          <el-input v-model="userForm.partnerName"/>
         </el-form-item>
         <el-form-item label="描述:" prop="description">
-          <el-input v-model="userForm.description" type="textarea" :rows="3" />
+          <el-input v-model="userForm.description" type="textarea" :rows="3"/>
         </el-form-item>
         <div class="select-box">
           <div class="mini">小程序</div>
@@ -155,7 +155,7 @@
               </ul>
             </div>
             <div class="checkBox-select-result">
-              <span class="result-span">成都 &nbsp;<i class="el-icon-close" @click="test" /></span>
+              <span class="result-span">成都 &nbsp;<i class="el-icon-close"/></span>
             </div>
           </div>
         </div>
@@ -181,10 +181,9 @@
 </template>
 
 <script>
-  import { addUser, editUser, deleteUser, exportFlie } from '@/api/user'
+  import { exportFlie } from '@/api/user'
   import { getRoles } from '@/api/role'
-  import { getPartners, getPartnersList } from '@/api/partner'
-  import waves from '@/directive/waves' // waves directive
+  import { getPartners, getPartnersList, addPartners, editPartners, deletePartners } from '@/api/partner'
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
   const clickoutside = {
@@ -218,7 +217,7 @@
   export default {
     name: 'ComplexTable',
     components: { Pagination },
-    directives: { waves, clickoutside },
+    directives: { clickoutside },
     data() {
       return {
         tableKey: 0,
@@ -254,19 +253,16 @@
         value: '',
         userForm: {
           id: undefined,
-          userCode: '',
-          password: '',
-          realName: '',
-          phone: '',
-          partnerIdArr: '',
-          ruleIdArr: ''
+          description: '',
+          partnerName: '',
+          programIdArr: ','
         },
         rules: {
           partnerName: [{ required: true, message: '合作方必填', trigger: 'blur' }],
           description: [{ required: true, message: '描述必填', trigger: 'blur' }]
         },
         dialogStatus: '添加',
-        dialogFormVisible: true,
+        dialogFormVisible: false,
         roles: [],
         partners: [],
         deleteUsers: ''
@@ -278,9 +274,6 @@
       this.getPartners()
     },
     methods: {
-      test() {
-        console.log(this.boxs)
-      },
       handleClose() {
         this.showSelect = false
       },
@@ -291,12 +284,9 @@
         this.total = res.total
       },
       handleDelete(data) {
-        deleteUser(data).then(() => {
+        deletePartners(data).then(() => {
           this.getList()
         })
-      },
-      chooseOpts(v) {
-        console.log('v', v)
       },
       handleExport() {
         exportFlie(this.listQuery).then(res => {
@@ -316,17 +306,14 @@
         this.$forceUpdate()
       },
       handleSelectionChange(v) {
-        this.deleteUsers = v.reduce((total, curr) => total + curr.userId + ',', '')
+        this.deleteUsers = v.reduce((total, curr) => total + curr.partnerId + ',', '')
       },
       resetForm() {
         this.userForm = {
           id: undefined,
-          userCode: '',
-          password: '',
-          realName: '',
-          phone: '',
-          partnerIdArr: '',
-          ruleIdArr: ''
+          partnerName: '',
+          description: '',
+          programIdArr: ','
         }
       },
       handleCreate() {
@@ -339,8 +326,7 @@
       },
       handleUpdate(row) {
         this.userForm = Object.assign({}, row)
-        this.userForm.partnerIdArr = row.partners[0].partnerId
-        this.userForm.ruleIdArr = row.rules[0].ruleId
+        this.userForm.programIdArr = ','
         this.dialogStatus = '编辑'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -351,10 +337,10 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.dialogStatus === '添加'
-              ? addUser(this.userForm).then(() => {
+              ? addPartners(this.userForm).then(() => {
                 this.getList()
               })
-              : editUser(this.userForm).then(() => {
+              : editPartners(this.userForm).then(() => {
                 this.getList()
               })
             this.dialogFormVisible = false

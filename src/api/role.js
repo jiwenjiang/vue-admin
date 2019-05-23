@@ -24,15 +24,15 @@ export function getRolesList(data) {
 
 export function addRole(data) {
   return request({
-    url: '/role',
+    url: '/system/sysrule/add',
     method: 'post',
     data
   })
 }
 
-export function updateRole(id, data) {
+export function editRole(data) {
   return request({
-    url: `/role/${id}`,
+    url: `/system/sysrule/edit`,
     method: 'put',
     data
   })
@@ -40,7 +40,14 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return request({
-    url: `/role/${id}`,
+    url: `/system/sysrule/delete/${id}`,
     method: 'delete'
+  })
+}
+
+export function roleAuth() {
+  return request({
+    url: `/system/sysrule/allAuth`,
+    method: 'get'
   })
 }
