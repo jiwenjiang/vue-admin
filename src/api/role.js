@@ -14,6 +14,14 @@ export function getRoles() {
   })
 }
 
+export function getRolesList(data) {
+  return request({
+    url: '/system/sysrule/list',
+    method: 'get',
+    params: data
+  })
+}
+
 export function addRole(data) {
   return request({
     url: '/role',

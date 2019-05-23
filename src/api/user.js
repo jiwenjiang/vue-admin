@@ -33,6 +33,37 @@ export function getList(data) {
   })
 }
 
+export function addUser(data) {
+  return request({
+    url: `/system/sysuser/add`,
+    method: 'post',
+    data: data
+  })
+}
+
+export function editUser(data) {
+  return request({
+    url: `/system/sysuser/edit`,
+    method: 'put',
+    data: data
+  })
+}
+
+export function deleteUser(data) {
+  return request({
+    url: `/system/sysuser/delete/${data}`,
+    method: 'delete'
+  })
+}
+
+export function exportFlie(data) {
+  return request({
+    url: `/system/sysuser/export`,
+    method: 'get',
+    params: data
+  })
+}
+
 export function logout() {
   return request({
     url: '/user/logout',
