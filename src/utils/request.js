@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth'
 import qs from 'qs'
 
 // create an axios instance
-const baseUrl = 'http://192.168.4.12:5009/'
+const baseUrl = 'http://192.168.4.241:5009/'
 const service = axios.create({
   baseURL: baseUrl, // url = base url + request url
   withCredentials: true, // send cookies when cross-domain requests

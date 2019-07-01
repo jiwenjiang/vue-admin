@@ -149,13 +149,16 @@
             </div>
             <div v-show="showSelect" class="checkBox-select-content">
               <ul>
-                <li v-for="item in cities" :key="item.id">
-                  <el-checkbox v-model="boxs[item.label]">{{ item.label }}</el-checkbox>
+                <li v-for="item in minis" :key="item.programId">
+                  <el-checkbox @change="handleCheckChange" v-model="boxs[item.programName]">{{ item.programName }}
+                  </el-checkbox>
                 </li>
               </ul>
             </div>
             <div class="checkBox-select-result">
-              <span class="result-span">成都 &nbsp;<i class="el-icon-close"/></span>
+              <span class="result-span" v-for="(val, key, index) in boxs" v-if="val" v-bind:key="index">{{key}}&nbsp;
+                <i class="el-icon-close" @click="deleteCheckbox(key)"/></span>
+              <!--<span class="result-span">fff &nbsp;<i class="el-icon-close"/></span>-->
             </div>
           </div>
         </div>
@@ -184,6 +187,7 @@
   import { exportFlie } from '@/api/user'
   import { getRoles } from '@/api/role'
   import { getPartners, getPartnersList, addPartners, editPartners, deletePartners } from '@/api/partner'
+  import { getAllMini } from '@/api/dataManage/mini'
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
   const clickoutside = {
@@ -191,7 +195,7 @@
     bind(el, binding, vnode) {
       function documentHandler(e) {
         // 这里判断点击的元素是否是本身，是本身，则返回
-        if (el.contains(e.target)) {
+        if (el.contains(e.target) || e.target.className === 'el-icon-close') {
           return false
         }
         // 判断指令中是否绑定了函数
@@ -224,9 +228,7 @@
         list: null,
         total: 0,
         listLoading: false,
-        boxs: {
-          上海: true
-        },
+        boxs: {},
         showSelect: false,
         listQuery: {
           page: 0,
@@ -240,16 +242,7 @@
           user: '',
           region: ''
         },
-        cities: [{
-          value: 'Beijing',
-          label: '北京'
-        }, {
-          value: 'Shanghai',
-          label: '上海'
-        }, {
-          value: 'Nanjing',
-          label: '南京'
-        }],
+        minis: [],
         value: '',
         userForm: {
           id: undefined,
@@ -282,6 +275,8 @@
         const res = await getPartnersList(this.listQuery)
         this.list = res.list
         this.total = res.total
+        const miniList = await getAllMini()
+        this.minis = miniList
       },
       handleDelete(data) {
         deletePartners(data).then(() => {
@@ -305,6 +300,9 @@
       forceChange() {
         this.$forceUpdate()
       },
+      deleteCheckbox(key) {
+        this.boxs[key] = false
+      },
       handleSelectionChange(v) {
         this.deleteUsers = v.reduce((total, curr) => total + curr.partnerId + ',', '')
       },
@@ -325,10 +323,14 @@
         })
       },
       handleUpdate(row) {
+        console.log(row)
         this.userForm = Object.assign({}, row)
         this.userForm.programIdArr = ','
         this.dialogStatus = '编辑'
         this.dialogFormVisible = true
+        row.programs.forEach(v => {
+          this.boxs[v.programName] = true
+        })
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
         })
@@ -336,6 +338,15 @@
       submitForm() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
+            let programIdArr = ''
+            for (const key in this.boxs) {
+              if (this.boxs[key]) {
+                programIdArr += this.minis.filter(v => v.programName == key)[0].programId + ','
+              }
+            }
+            this.userForm.programIdArr = programIdArr
+            // console.log('programIdArr', programIdArr)n
+            // return false
             this.dialogStatus === '添加'
               ? addPartners(this.userForm).then(() => {
                 this.getList()
@@ -346,6 +357,10 @@
             this.dialogFormVisible = false
           }
         })
+      },
+      handleCheckChange(e) {
+        // console.log(e)
+        // console.log(this.boxs)
       },
       async getRoles() {
         const res = await getRoles()
@@ -420,6 +435,7 @@
       margin-top: 6px;
       .result-span {
         padding: 4px 6px;
+        margin-right: 2px;
         font-size: 14px;
         color: #7F8C8D;
         background-color: #EFEFEF;
