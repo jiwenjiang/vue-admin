@@ -11,48 +11,26 @@ export function getAreaList(data) {
   })
 }
 
-export function getAreaAll(data) {
+export function updateStatus(data) {
   return request({
-    url: `/system/locMapZone/getAll`,
+    url: `/system/locMapZone/updateStatus`,
     method: 'post',
     data: data
   })
 }
 
-export function getAllMini(data) {
+export function updateMarker(data) {
   return request({
-    url: `/system/syssmallprogram/programAll`,
-    method: 'get',
-    params: data
+    url: `/system/locMapZone/updateWatermark`,
+    method: 'post',
+    data: data
   })
 }
 
-
-export function getNoBindList(programId) {
+export function getAreaAll(data) {
   return request({
-    url: `/system/syssmallprogram/programNoBindZone/${programId}`,
-    method: 'get'
-  })
-}
-
-export function getOtherBindList(programId) {
-  return request({
-    url: `/system/syssmallprogram/programOtherZone/${programId}`,
-    method: 'get'
-  })
-}
-
-export function getBindList(programId) {
-  return request({
-    url: `/system/syssmallprogram/get/${programId}`,
-    method: 'get'
-  })
-}
-
-export function cancelMiniBind(data) {
-  return request({
-    url: `/system/syssmallprogram/untyZone`,
-    method: 'put',
+    url: `/system/locMapZone/getAll`,
+    method: 'post',
     data: data
   })
 }
@@ -75,7 +53,7 @@ export function editUser(data) {
 
 export function deleteUser(data) {
   return request({
-    url: `/system/sysuser/delete/${data}`,
+    url: `/system/locMapZone/delete/${data}`,
     method: 'delete'
   })
 }

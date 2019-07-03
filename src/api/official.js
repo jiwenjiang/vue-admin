@@ -11,6 +11,14 @@ export function getList(data) {
   })
 }
 
+export function getAllWX(data) {
+  return request({
+    url: `/system/syswxconfig/all`,
+    method: 'get',
+    params: data
+  })
+}
+
 export function addWx(data) {
   return request({
     url: `/system/syswxconfig/add`,
