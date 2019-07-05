@@ -4,6 +4,10 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 import qs from 'qs'
 
+let isFormData = (v) => {
+  return Object.prototype.toString.call(v) === '[object FormData]'
+}
+
 // create an axios instance
 const baseUrl = 'http://192.168.4.241:5009/'
 const service = axios.create({
@@ -15,7 +19,10 @@ const service = axios.create({
     'authorization': 'Basic d3NuZ3QtaDU6d3NuZ3QtaDU='
   },
   transformRequest: [function(data) {
-    data = qs.stringify(data)
+    if (!isFormData(data)) {
+      data = qs.stringify(data)
+    }
+    // console.log(1111, data && data.valueOf())
     return data
   }]
 })

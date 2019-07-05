@@ -37,7 +37,15 @@ export function getAreaAll(data) {
 
 export function addUser(data) {
   return request({
-    url: `/system/syssmallprogram/add`,
+    url: `/system/locMapZone/add`,
+    method: 'post',
+    data: data
+  })
+}
+
+export function submitCenter(data) {
+  return request({
+    url: `/system/locMapZone/updateLongitudeAndlatitude`,
     method: 'post',
     data: data
   })
@@ -60,7 +68,7 @@ export function deleteUser(data) {
 
 export function exportFlie(data) {
   return request({
-    url: `/system/sysuser/export`,
+    url: `/system/locMapZone/export`,
     method: 'get',
     params: data
   })

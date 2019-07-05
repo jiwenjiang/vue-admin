@@ -9,7 +9,8 @@
     <title><%= webpackConfig.name %></title>
   </head>
   <body>
-    <!-- import cdn js -->
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=x5dCythzIiGoONfxLriNmvGlTiqfbGhn"></script>
+  <!-- import cdn js -->
     <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
       <script src="<%=js%>"></script>
     <% } %>
