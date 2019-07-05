@@ -28,6 +28,7 @@ import * as filters from './filters' // global filters
  * please remove it before going online! ! !
  */
 import { mockXHR } from '../mock'
+
 if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
@@ -42,6 +43,7 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
+Vue.prototype._baseUrl = 'http://192.168.4.241:5009'
 
 new Vue({
   el: '#app',

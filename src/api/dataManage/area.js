@@ -53,7 +53,7 @@ export function submitCenter(data) {
 
 export function editUser(data) {
   return request({
-    url: `/system/sysuser/edit`,
+    url: `/system/locMapZone/edit`,
     method: 'put',
     data: data
   })

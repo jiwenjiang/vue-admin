@@ -87,7 +87,7 @@
       </el-table-column>
       <el-table-column label="是否显示商标" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.isWatermark }}</span>
+          <span>{{ scope.row.watermark?'是':'否' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="定位配置" align="center">
@@ -124,7 +124,7 @@
       </el-table-column>
       <el-table-column label="状态" align="center">
         <template slot-scope="scope">
-          <el-tag size="small" v-if="scope.row.status=='开启'" effect="plain">已开启</el-tag>
+          <el-tag size="small" v-if="scope.row.status" effect="plain">已开启</el-tag>
           <el-tag size="small" v-else effect="plain" type="danger">已关闭</el-tag>
         </template>
       </el-table-column>
@@ -135,13 +135,13 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width areaBtn">
         <template slot-scope="scope">
-          <el-tag size="small" v-if="scope.row.isWatermark!='是'" color="#45D1A8"
-                  @click="openMark({id:scope.row.id,isWatermark :true})">显示商标
+          <el-tag size="small" v-if="!scope.row.watermark" color="#45D1A8"
+                  @click="openMark({id:scope.row.id,watermark :true})">显示商标
           </el-tag>
-          <el-tag size="small" v-else color="#3AC8E2" @click="openMark({id:scope.row.id,isWatermark :false})">隐藏商标
+          <el-tag size="small" v-else color="#3AC8E2" @click="openMark({id:scope.row.id,watermark :false})">隐藏商标
           </el-tag>
-          <el-tag size="small" v-if="scope.row.status=='开启'" color="#EF9302"
-                  @click="openMap({id:scope.row.id,isWatermark :false})">关闭
+          <el-tag size="small" v-if="scope.row.status" color="#EF9302"
+                  @click="openMap({id:scope.row.id,watermark :false})">关闭
           </el-tag>
           <el-tag size="small" v-else color="#409EFF" @click="openMap({id:scope.row.id,status:true})">开启</el-tag>
           <el-tag size="small" color="#F86746" @click="setPoint(scope.row)">设置中心点</el-tag>
@@ -221,8 +221,8 @@
             <el-radio label="map">地图页面</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="是否显示商标：" prop="isWatermark">
-          <el-radio-group v-model="userForm.isWatermark">
+        <el-form-item label="是否显示商标：" prop="watermark">
+          <el-radio-group v-model="userForm.watermark">
             <el-radio :label="true">是</el-radio>
             <el-radio :label="false">否</el-radio>
           </el-radio-group>
@@ -264,7 +264,8 @@
     updateMarker,
     addUser,
     submitCenter,
-    exportFlie
+    exportFlie,
+    editUser
   } from '@/api/dataManage/area'
   import { getAllWX } from '@/api/official'
   import { getPartners } from '@/api/partner'
@@ -305,7 +306,7 @@
           logo: '',
           locType: 'IAO',
           defaultEntry: 'index',
-          isWatermark: true,
+          watermark: true,
           typeName: 'car',
           wxName: ''
         },
@@ -362,7 +363,6 @@
         })
       },
       setPoint(row) {
-        console.log(row)
         this.currentProgramId = row.id
         this.showMap = true
         this.$nextTick(() => {
@@ -447,7 +447,6 @@
         }
       },
       toUploadFile(res) {
-        console.log(res)
         this.userForm.logo = res.file
         this.imageUrl = URL.createObjectURL(res.file)
       },
@@ -483,7 +482,7 @@
           logo: '',
           locType: 'IAO',
           defaultEntry: 'index',
-          isWatermark: true,
+          watermark: true,
           typeName: 'car',
           wxName: ''
         }
@@ -514,6 +513,7 @@
         console.log(row)
         this.currentProgramId = row.id
         this.userForm = Object.assign({}, row)
+        this.imageUrl = this._baseUrl + row.logo
         // this.userForm.partnerIdArr = row.partners[0].partnerId
         // this.userForm.ruleIdArr = row.rules[0].ruleId
         this.dialogStatus = '编辑'
@@ -525,25 +525,19 @@
       submitForm() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            console.log(this.userForm)
+            console.log(444444444444, this.userForm)
+            const formData = new FormData()
+            Object.keys(this.userForm).forEach((key) => {
+              formData.append(key, this.userForm[key])
+            })
             if (this.dialogStatus === '添加') {
-              const formData = new FormData()
-              Object.keys(this.userForm).forEach((key) => {
-                formData.append(key, this.userForm[key])
-              })
               addUser(formData).then(() => {
                 this.getList()
               })
             } else {
-              editUser(this.userForm).then(() => {
+              editUser(formData).then(() => {
                 this.getList()
-                this.getBindList(this.userForm.programId)
-                this.getNoBindList(this.userForm.programId)
-                this.getOtherBindList(this.userForm.programId)
               })
-              if (this.chooseArea.length > 0) {
-                addMiniBind({ programId: this.userForm.programId, zoneId: this.chooseArea.join() })
-              }
             }
             this.dialogFormVisible = false
           }
