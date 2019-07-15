@@ -37,6 +37,13 @@ export function editPartners(data) {
 export function deletePartners(data) {
   return request({
     url: `/system/syspartner/delete/${data}`,
-    method: 'delete',
+    method: 'delete'
+  })
+}
+
+export function getMini(data) {
+  return request({
+    url: `/system/syspartner/getPrograms/${data}`,
+    method: 'get'
   })
 }

@@ -43,7 +43,7 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
-Vue.prototype._baseUrl = 'http://192.168.4.241:5009'
+Vue.prototype._baseUrl = 'http://192.168.4.121:5009'
 
 new Vue({
   el: '#app',

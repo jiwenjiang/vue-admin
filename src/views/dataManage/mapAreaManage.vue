@@ -82,7 +82,7 @@
       </el-table-column>
       <el-table-column label="区域LOGO" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.logo }}</span>
+          <img :src="baseUrl+scope.row.logo" style="width: 38px;height: 38px" alt="">
         </template>
       </el-table-column>
       <el-table-column label="是否显示商标" align="center">
@@ -327,12 +327,14 @@
         dialogContent: '',
         imageUrl: '',
         wxLists: [],
-        transPt: []
+        transPt: [],
+        baseUrl: this._baseUrl
       }
     },
     created() {
       this.getList()
       this.getPartners()
+      console.log(this.baseUrl)
     },
     methods: {
       async getList() {
@@ -510,7 +512,6 @@
         })
       },
       handleUpdate(row) {
-        console.log(row)
         this.currentProgramId = row.id
         this.userForm = Object.assign({}, row)
         this.imageUrl = this._baseUrl + row.logo
@@ -525,7 +526,6 @@
       submitForm() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            console.log(444444444444, this.userForm)
             const formData = new FormData()
             Object.keys(this.userForm).forEach((key) => {
               formData.append(key, this.userForm[key])
