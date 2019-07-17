@@ -32,6 +32,9 @@ const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
+  },
+  SET_USERINFO: (state, userId) => {
+    state.userId = userId
   }
 }
 
@@ -82,6 +85,7 @@ const actions = {
         //
 
         commit('SET_ROUTES', routes)
+        commit('SET_USERINFO', response.userId)
         // commit('SET_NAME', name)
         // commit('SET_AVATAR', avatar)
         // commit('SET_INTRODUCTION', introduction)

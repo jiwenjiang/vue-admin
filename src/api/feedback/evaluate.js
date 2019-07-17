@@ -1,32 +1,11 @@
+/**
+ * Created by j_bleach on 2019/7/17 0017.
+ */
 import request from '@/utils/request'
-
-export function login(data) {
-  return request({
-    url: '/oauth/token',
-    method: 'post',
-    data
-  })
-}
-
-export function register(data) {
-  return request({
-    url: '/system/sysuser/register',
-    method: 'post',
-    data
-  })
-}
-
-export function getInfo(name) {
-  const url = `/system/sysuser/name/${name}`
-  return request({
-    url: url,
-    method: 'get'
-  })
-}
 
 export function getList(data) {
   return request({
-    url: `/system/sysuser/list`,
+    url: `/system/sysnaveval/list`,
     method: 'get',
     params: data
   })
@@ -50,14 +29,14 @@ export function editUser(data) {
 
 export function deleteUser(data) {
   return request({
-    url: `/system/sysuser/delete/${data}`,
+    url: `/system/sysnaveval/delete/${data}`,
     method: 'delete'
   })
 }
 
 export function exportFlie(data) {
   return request({
-    url: `/system/sysuser/export`,
+    url: `/system/sysnaveval/export`,
     method: 'get',
     params: data
   })

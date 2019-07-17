@@ -69,7 +69,6 @@
         </el-form>
       </div>
     </div>
-    <div id="map-body" class="map-body"></div>
     <div class="map-operators-floor-total" id="map-operators-floor-total">
       <ul>
         <li
@@ -80,6 +79,7 @@
         </li>
       </ul>
     </div>
+    <div id="map-body" class="map-body"></div>
   </div>
 </template>
 
@@ -88,6 +88,7 @@
   import { getPartners } from '@/api/partner'
   import { getAllMini } from '@/api/dataManage/mini'
   import { getAreaAll } from '@/api/dataManage/area'
+  import ibeaconImg from '@/assets/custom-theme/ibeacon.png'
   // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
   // import * as creeper from '@/utils/mapbox-gl'
 
@@ -159,7 +160,8 @@
         floorData: [],
         currFloor: 0,
         map: '',
-        floorObj: {}
+        floorObj: {},
+        devicesMarkerList: []
       }
     },
     created() {
@@ -169,7 +171,7 @@
       this.getAreaList()
     },
     mounted() {
-      document.getElementById('map-body').style.height = 'calc(100vh - 84px)'
+      // document.getElementById('map-body').style.height = 'calc(100vh - 84px)'
     },
     methods: {
       handleClose() {
@@ -191,9 +193,17 @@
             this.floorObj[v.level].push(v)
           }
         })
-        this.floorObj[this.currFloor].forEach()
-        console.log(this.floorObj)
-        console.log('res', res)
+        this.floorObj[this.currFloor].forEach((v, i) => {
+          console.log(v.level)
+          const el = document.createElement('div')
+          const img = document.createElement('img')
+          img.src = ibeaconImg
+          img.style.width = '30px'
+          el.appendChild(img)
+          this.devicesMarkerList[i] = new creeper.Marker(el).setLngLat([v.lon, v.lat]).addTo(this.map)
+        })
+        console.log(this.floorObj[this.currFloor])
+        // console.log('res', res)
       },
       chooseMap(id) {
         creeper.CreeperConfig.token = 'bG9jYXRpb246YzFmNWZmZDg4ZWNkYzQyZDJlYzFkZjViYTU1OWU4MTA='
@@ -213,8 +223,8 @@
               const itemHeight = mapFloor.scrollHeight / floorData.length
               const scrollHeight = (index - 1) * itemHeight
               mapFloor.scrollTop = scrollHeight
+              this.getList()
             })
-            this.getList()
           })
         })
         this.forceChange()
@@ -280,8 +290,8 @@
 
 <style lang="scss" scoped>
   .map-body {
-    width: 100%;
-    margin-top: -20px;
+    width: 100vw;
+    height: 100vh;
   }
 
   /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
