@@ -68,6 +68,7 @@
           </el-form-item>
         </el-form>
       </div>
+      <div id="map-body" class="map-body"></div>
     </div>
     <div class="map-operators-floor-total" id="map-operators-floor-total">
       <ul>
@@ -79,7 +80,6 @@
         </li>
       </ul>
     </div>
-    <div id="map-body" class="map-body"></div>
   </div>
 </template>
 
@@ -89,6 +89,7 @@
   import { getAllMini } from '@/api/dataManage/mini'
   import { getAreaAll } from '@/api/dataManage/area'
   import ibeaconImg from '@/assets/custom-theme/ibeacon.png'
+  import ibeaconImg2 from '@/assets/custom-theme/ibeacon2.png'
   // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
   // import * as creeper from '@/utils/mapbox-gl'
 
@@ -161,7 +162,10 @@
         currFloor: 0,
         map: '',
         floorObj: {},
-        devicesMarkerList: []
+        devicesMarkerList: [],
+        tempArr: [],
+        tempMarker: null,
+        tempPop: null
       }
     },
     created() {
@@ -171,7 +175,7 @@
       this.getAreaList()
     },
     mounted() {
-      // document.getElementById('map-body').style.height = 'calc(100vh - 84px)'
+      document.getElementById('map-body').style.height = 'calc(100vh - 84px)'
     },
     methods: {
       handleClose() {
@@ -193,17 +197,104 @@
             this.floorObj[v.level].push(v)
           }
         })
+        this.ibeaconImg2 = document.createElement('div')
+        const img2 = document.createElement('img')
+        this.ibeaconImg2.id = 'clickme'
+        img2.src = ibeaconImg2
+        img2.style.width = '30px'
+        this.ibeaconImg2.appendChild(img2)
         this.floorObj[this.currFloor].forEach((v, i) => {
-          console.log(v.level)
-          const el = document.createElement('div')
-          const img = document.createElement('img')
-          img.src = ibeaconImg
-          img.style.width = '30px'
-          el.appendChild(img)
-          this.devicesMarkerList[i] = new creeper.Marker(el).setLngLat([v.lon, v.lat]).addTo(this.map)
+          this.generateMarker(v)
         })
         console.log(this.floorObj[this.currFloor])
         // console.log('res', res)
+      },
+      generateMarker(v) {
+        const el = document.createElement('div')
+        const img = document.createElement('img')
+        const span = document.createElement('span')
+        span.innerText = v.rssi + 'kb'
+        span.className = 'span-position'
+        img.src = ibeaconImg
+        img.style.width = '40px'
+        el.appendChild(img)
+        el.appendChild(span)
+        el.uid = v.deviceId
+        img.uid = v.deviceId
+        span.uid = v.deviceId
+        el.addEventListener('click', (e) => {
+          this.devicesMarkerList.filter(v => v.uid == e.target.uid)[0].marker.remove()
+          this.devicesMarkerList = this.devicesMarkerList.filter(v => v.uid != e.target.uid)
+          const tempObj = this.floorObj[this.currFloor].filter(v => v.deviceId == e.target.uid)[0]
+          console.log(tempObj)
+          if (this.tempArr.length > 0) {
+            const obj = this.tempArr[0]
+            this.tempMarker.remove()
+            this.tempPop.remove()
+            // var div2 = window.document.createElement('div')
+            // div2.innerHTML = 'Hello, world!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            // var popup = new creeper.Popup({ offset: 25, closeOnClick: false }).setLngLat({
+            //   lon: tempObj.lon,
+            //   lat: tempObj.lat
+            // }).setDOMContent(div2).addTo(this.map)
+
+            this.tempMarker = new creeper.Marker(this.ibeaconImg2).setLngLat([tempObj.lon, tempObj.lat]).addTo(this.map)
+            // set pop
+            const tag = `<div class="markerPop">
+    <div class="markerPop-head">设备信息</div>
+    <div class="markerPop-body">
+    <ul>
+    <li>编号:${tempObj.device}</li>
+    <li>major:${tempObj.major}</li>
+    <li>minor:${tempObj.minor}</li>
+    <li>地图区域:${tempObj.name}</li>
+    <li>楼栋名称:${tempObj.building}</li>
+    <li>楼层:${tempObj.level}</li>
+    <li>绑定位置:${tempObj.lon},${tempObj.lat}</li>
+    <li>添加账号:</li>
+    <li>添加时间:${tempObj.posttime}</li>
+</ul>
+</div>
+</div>`
+            this.tempPop = new creeper.Popup({ offset: 25, closeOnClick: false })
+              .setLngLat([tempObj.lon, tempObj.lat])
+              .setHTML(tag)
+              .addTo(this.map)
+
+            // console.log('pop', popup, div2)
+            this.generateMarker(obj)
+            this.tempArr[0] = tempObj
+          } else {
+            this.tempArr.push(tempObj)
+            // set pop
+            this.tempMarker = new creeper.Marker(this.ibeaconImg2).setLngLat([tempObj.lon, tempObj.lat]).addTo(this.map)
+            const tag = `<div class="markerPop">
+    <div class="markerPop-head">设备信息</div>
+    <div class="markerPop-body">
+    <ul>
+    <li>编号:${tempObj.device}</li>
+    <li>major:${tempObj.major}</li>
+    <li>minor:${tempObj.minor}</li>
+    <li>地图区域:${tempObj.name}</li>
+    <li>楼栋名称:${tempObj.building}</li>
+    <li>楼层:${tempObj.level}</li>
+    <li>绑定位置:${tempObj.lon},${tempObj.lat}</li>
+    <li>添加账号:</li>
+    <li>添加时间:${tempObj.posttime}</li>
+</ul>
+</div>
+</div>`
+            this.tempPop = new creeper.Popup({ offset: 25, closeOnClick: false })
+              .setLngLat([tempObj.lon, tempObj.lat])
+              .setHTML(tag)
+              .addTo(this.map)
+          }
+          // this.devicesMarkerList.filter(v => v.uid == e.target.uid)[0]
+        })
+        this.devicesMarkerList.push({
+          uid: v.deviceId,
+          marker: new creeper.Marker(el).setLngLat([v.lon, v.lat]).addTo(this.map)
+        })
       },
       chooseMap(id) {
         creeper.CreeperConfig.token = 'bG9jYXRpb246YzFmNWZmZDg4ZWNkYzQyZDJlYzFkZjViYTU1OWU4MTA='
@@ -248,8 +339,24 @@
         return mapFloor == referFloor ? 'chooseItem' : ''
       },
       changeFloor(v) {
-        this.currFloor = v >= 0 ? v - 1 : v
+        const level = v >= 0 ? v - 1 : v
+        if (level == this.currFloor) {
+          return false
+        }
+        this.currFloor = level
         this.map.setLevel(this.currFloor)
+        this.devicesMarkerList.forEach(v => v.marker.remove())
+        this.devicesMarkerList = []
+        if (this.tempMarker) {
+          this.tempMarker.remove()
+          this.tempPop.remove()
+          this.tempMarker = null
+          this.tempPop = null
+          this.tempArr = []
+        }
+        this.floorObj[this.currFloor].forEach((v, i) => {
+          this.generateMarker(v)
+        })
       },
       handleDelete(data) {
         deleteUser(data).then(() => {
@@ -288,10 +395,45 @@
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .map-body {
     width: 100vw;
     height: 100vh;
+  }
+
+  .span-position {
+    position: absolute;
+    left: 5px;
+    color: white;
+  }
+
+  .mapboxgl-popup-content {
+    padding: 0 !important;
+  }
+
+  .markerPop {
+    /*width: 100px;*/
+    /*height: 100px;*/
+    .markerPop-head {
+      width: 200px;
+      height: 20px;
+      background-color: #409FFF;
+      position: absolute;
+      padding: 0 10px;
+      top: 0;
+      color: white;
+    }
+    .markerPop-body {
+      width: 200px;
+      min-height: 100px;
+      padding: 0 10px;
+      margin-top: 25px;
+      ul, li {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+    }
   }
 
   /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
@@ -318,9 +460,10 @@
   .map-operators-floor-total {
     right: 10px;
     bottom: 30px;
-    position: absolute;
+    position: fixed;
     height: 180px;
     width: 32px;
+    z-index: 1;
     overflow-y: auto;
     overflow-x: hidden;
     background: rgba(255, 255, 255, 1);
