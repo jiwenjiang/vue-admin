@@ -241,7 +241,7 @@
             this.tempMarker = new creeper.Marker(this.ibeaconImg2).setLngLat([tempObj.lon, tempObj.lat]).addTo(this.map)
             // set pop
             const tag = `<div class="markerPop">
-    <div class="markerPop-head">设备信息</div>
+    <div class="markerPop-head">设备信息<i class="el-icon-close" id="close-marker"></i></div>
     <div class="markerPop-body">
     <ul>
     <li>编号:${tempObj.device}</li>
@@ -269,7 +269,7 @@
             // set pop
             this.tempMarker = new creeper.Marker(this.ibeaconImg2).setLngLat([tempObj.lon, tempObj.lat]).addTo(this.map)
             const tag = `<div class="markerPop">
-    <div class="markerPop-head">设备信息</div>
+    <div class="markerPop-head">设备信息<i class="el-icon-close" id="close-marker"></i></div>
     <div class="markerPop-body">
     <ul>
     <li>编号:${tempObj.device}</li>
@@ -290,6 +290,14 @@
               .addTo(this.map)
           }
           // this.devicesMarkerList.filter(v => v.uid == e.target.uid)[0]
+          document.getElementById('close-marker').addEventListener('click', () => {
+            this.generateMarker(tempObj)
+            this.tempMarker.remove()
+            this.tempPop.remove()
+            this.tempMarker = null
+            this.tempPop = null
+            this.tempArr = []
+          })
         })
         this.devicesMarkerList.push({
           uid: v.deviceId,
@@ -422,6 +430,11 @@
       padding: 0 10px;
       top: 0;
       color: white;
+      i {
+        position: absolute;
+        right: 8px;
+        top: 6px;
+      }
     }
     .markerPop-body {
       width: 200px;
