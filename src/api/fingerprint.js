@@ -13,7 +13,7 @@ export function getList(data) {
 
 export function exportFlie(data) {
   return request({
-    url: `/system/IbeaconDevice/export`,
+    url: `/system/sysIbeaconClass/exportLibrary`,
     method: 'get',
     params: data
   })
@@ -27,3 +27,26 @@ export function getTime(data) {
   })
 }
 
+export function deletePrint(data) {
+  return request({
+    url: `/location/class/v1/delete`,
+    method: 'put',
+    data: data
+  })
+}
+
+export function deletePrints(data) {
+  return request({
+    url: `/location/class/v1/bulkDelete`,
+    method: 'put',
+    data: data
+  })
+}
+
+export function getDBList(data) {
+  return request({
+    url: `/system/sysIbeaconClass/list`,
+    method: 'post',
+    data: data
+  })
+}
