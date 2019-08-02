@@ -80,3 +80,11 @@ export function logout() {
     method: 'post'
   })
 }
+
+export function synchro(data) {
+  return request({
+    url: '/system/locMapZone/synchronization',
+    method: 'get',
+    params: data
+  })
+}

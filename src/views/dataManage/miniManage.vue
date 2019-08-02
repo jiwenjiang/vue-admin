@@ -133,6 +133,16 @@
         <el-form-item label="小程序：" prop="programName">
           <el-input v-model="userForm.programName" placeholder="请输入小程序名称  "/>
         </el-form-item>
+        <el-form-item label="合作方：" prop="parentIdArr">
+          <el-select v-model="userForm.parentIdArr" style="width: 100%" filterable placeholder="请选择公众号">
+            <el-option
+              v-for="item in partners"
+              :key="item.partnerId"
+              :label="item.partnerName"
+              :value="item.partnerId"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="当前已绑定区域" style="padding: 7px" name="directly">
@@ -278,7 +288,8 @@
           appid: '',
           secret: '',
           programName: '',
-          zoneIdArr: ','
+          zoneIdArr: ',',
+          parentIdArr: ''
         },
         rules: {
           appid: [{ required: true, message: 'appid必填', trigger: 'blur' }],
@@ -374,7 +385,8 @@
           appid: '',
           secret: '',
           programName: '',
-          zoneIdArr: ','
+          zoneIdArr: ',',
+          parentIdArr: ''
         }
       },
       handleCreate() {

@@ -53,7 +53,7 @@
           <el-button type="primary" icon="el-icon-search" @click="getList">搜索</el-button>
           <el-button type="success" icon="el-icon-edit" @click="handleCreate">添加</el-button>
           <el-button type="danger" icon="el-icon-delete" @click="handleDelete(deleteUsers)">批量删除</el-button>
-          <el-button type="primary" icon="el-icon-refresh" @click="handleCreate">CMGIS区域同步</el-button>
+          <el-button type="primary" icon="el-icon-refresh" @click="areaSync">CMGIS区域同步</el-button>
           <el-button style="background-color: #51D4D2;color: white" icon="el-icon-upload2">导入
           </el-button>
           <el-button type="warning" icon="el-icon-download" @click="handleExport()">导出</el-button>
@@ -215,6 +215,12 @@
             <el-radio label="O">室外</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="活动性质">
+          <el-checkbox-group v-model="userForm.navigationMode">
+            <el-checkbox label="1">人走</el-checkbox>
+            <el-checkbox label="2">车走</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
         <el-form-item label="默认进入：" prop="defaultEntry">
           <el-radio-group v-model="userForm.defaultEntry">
             <el-radio label="index">内容首页</el-radio>
@@ -243,6 +249,22 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="小程序：" prop="wxName">
+          <el-select
+            v-model="userForm.programIds"
+            class="filter-item"
+            placeholder="选择"
+            style="width: 120px"
+            @change="forceChange"
+          >
+            <el-option
+              v-for="item in minis"
+              :key="item.programId"
+              :label="item.programName"
+              :value="item.programId"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -265,10 +287,12 @@
     addUser,
     submitCenter,
     exportFlie,
-    editUser
+    editUser,
+    synchro
   } from '@/api/dataManage/area'
   import { getAllWX } from '@/api/official'
   import { getPartners } from '@/api/partner'
+  import { userMini } from '@/api/dataManage/mini'
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
   import coordtransform from 'coordtransform'
   import locImg from '@/assets/custom-theme/loc.png'
@@ -308,7 +332,8 @@
           defaultEntry: 'index',
           watermark: true,
           typeName: 'car',
-          wxName: ''
+          wxName: '',
+          navigationMode: []
         },
         rules: {
           mapId: [{ required: true, message: '地图必填', trigger: 'blur' }],
@@ -328,13 +353,14 @@
         imageUrl: '',
         wxLists: [],
         transPt: [],
-        baseUrl: this._baseUrl
+        baseUrl: this._baseUrl,
+        minis: []
       }
     },
     created() {
       this.getList()
       this.getPartners()
-      console.log(this.baseUrl)
+      this.getMinis()
     },
     methods: {
       async getList() {
@@ -342,6 +368,11 @@
         const res = await getAreaList(this.listQuery)
         this.list = res.list
         this.total = res.total
+      },
+      async getMinis() {
+        const res = await userMini()
+        this.minis = res
+        console.log(4444, res)
       },
       openMap(data) {
         this.alertDialogVisible = true
@@ -362,6 +393,16 @@
       openMark(data) {
         updateMarker(data).then(() => {
           this.getList()
+        })
+      },
+      areaSync() {
+        this.$confirm('是否进行覆盖', 'CMGIS区域同步', {
+          confirmButtonText: '覆盖更新',
+          cancelButtonText: '不覆盖更新'
+        }).then(() => {
+          synchro({ flag: true })
+        }).catch(() => {
+          synchro({ flag: false })
         })
       },
       setPoint(row) {
@@ -486,7 +527,9 @@
           defaultEntry: 'index',
           watermark: true,
           typeName: 'car',
-          wxName: ''
+          wxName: '',
+          programIds: '',
+          navigationMode: []
         }
       },
       handleCreate() {

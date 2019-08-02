@@ -93,3 +93,11 @@ export function logout() {
     method: 'post'
   })
 }
+
+export function userMini(data) {
+  return request({
+    url: `/system/syssmallprogram/userProgram`,
+    method: 'get',
+    params: data
+  })
+}

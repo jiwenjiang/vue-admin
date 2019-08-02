@@ -36,7 +36,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="所属区域">
-          <el-input v-model="listQuery.mapName" placeholder="请输入地图区域名称" style="width: 120px"/>
+          <el-input v-model="listQuery.name" placeholder="请输入地图区域名称" style="width: 120px"/>
         </el-form-item>
         <el-form-item label="选择时间">
           <div style="width: 290px">
@@ -62,9 +62,6 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" @click="getList">搜索</el-button>
-          <el-button type="danger" icon="el-icon-delete" @click="handleDelete(deleteUsers)">批量删除</el-button>
-          <el-button type="warning" icon="el-icon-upload2">导入</el-button>
-          <el-button type="primary" icon="el-icon-download" @click="handleExport()">导出</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -85,44 +82,31 @@
       />
       <el-table-column label="指纹库文件名" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.areaName }}</span>
+          <span>{{ scope.row.fileName }}</span>
         </template>
       </el-table-column>
       <el-table-column label="存储路径" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.serviceTypeId }}</span>
+          <span>{{ scope.row.filePath }}</span>
         </template>
       </el-table-column>
       <el-table-column label="所属地图区域" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.mapName }}</span>
+          <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="更新时间" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.longitude+','+scope.row.latitude }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="文件大小" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.orderid }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="版本号" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.updateTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button type="warning" size="mini" @click="handleUpdate(row)">
             更新
           </el-button>
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button type="success" size="mini" @click="handleExport(row)">
             下载
-          </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row.functionAreaId)">
-            删除
           </el-button>
         </template>
       </el-table-column>
@@ -136,140 +120,48 @@
       @pagination="getList"
     />
 
-    <div v-if="dialogFormVisible" class="map-box">
-      <div class="map-container">
-        <div class="map-head">
-          <span>{{dialogStatus}}</span>
-          <i class="el-icon-close" style="cursor: pointer" @click="dialogFormVisible=false"></i>
-        </div>
-        <div id="map-body" class="map-body"></div>
-        <div class="map-foot">
-          <el-form
-            ref="dataForm"
-            :rules="rules"
-            :model="userForm"
-            label-position="top"
-            size="mini"
-            style="height: 75vh"
-          >
-            <el-form-item label="数据名称：" prop="areaName">
-              <el-input v-model="userForm.areaName" placeholder="请输入分类名称"/>
-            </el-form-item>
-            <el-form-item label="合作方：" prop="partnerName">
-              <el-select
-                v-model="userForm.partnerName"
-                clearable
-                class="filter-item"
-                placeholder="选择"
-                style="width: 100%"
-                @change="searchMini"
-              >
-                <el-option
-                  v-for="item in partners"
-                  :key="item.partnerId"
-                  :label="item.partnerName"
-                  :value="item.partnerId"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="小程序：" prop="partnersMini">
-              <el-select
-                v-model="userForm.programName"
-                class="filter-item"
-                placeholder="选择"
-                style="width: 100%"
-                @change="searchArea"
-              >
-                <el-option
-                  v-for="item in partnersMini"
-                  :key="item.programName"
-                  :label="item.programName"
-                  :value="item.programId"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="地图区域：" prop="mapId2">
-              <el-select
-                v-model="userForm.mapId"
-                class="filter-item"
-                style="width: 100%"
-                placeholder="选择"
-                @change="chooseMap"
-              >
-                <el-option
-                  v-for="item in areas"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.mapId"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="分类类型：" prop="serviceType">
-              <el-select
-                v-model="userForm.serviceType"
-                class="filter-item"
-                style="width: 100%"
-                placeholder="选择"
-                @change="chooseType"
-              >
-                <el-option
-                  v-for="item in types"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="所属分类：" prop="serviceTypeId">
-              <el-select
-                v-model="userForm.serviceTypeId"
-                class="filter-item"
-                style="width: 100%"
-                placeholder="选择"
-                @change="forceChange"
-              >
-                <el-option
-                  v-for="item in serviceTypeIds"
-                  :key="item.serviceTypeId"
-                  :label="item.serviceName"
-                  :value="item.serviceTypeId"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="位置：" prop="longitudeAndLatitude">
-              <el-input v-model="userForm.longitudeAndLatitude" placeholder="经纬度"/>
-            </el-form-item>
-            <el-form-item label="排序：" prop="orderid">
-              <el-input v-model="userForm.orderid" type="number" placeholder="前一个分类排序为5，推荐排序6"/>
-            </el-form-item>
-            <div style="text-align: center;margin: 10px">
-              <el-button type="primary" size="small" @click="submitForm(dialogStatus)">
-                提交
-              </el-button>
-            </div>
-          </el-form>
-        </div>
+    <el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible" top="10vh" width="460px">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="userForm"
+        label-position="left"
+        label-width="100px"
+        style="width: 420px;"
+      >
+        <el-form-item label="指纹库文件：" prop="userCode">
+          <el-input v-model="userForm.filename" placeholder="未选择文件" readonly style="width: 240px"/>
+          <span class="chooseFile" @click="chooseFile">选择文件</span>
+          <input type="file" id="upfile" class="file-input"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="submitForm(dialogStatus)">
+          提交
+        </el-button>
       </div>
-    </div>
-    <!--<el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible" top="10vh" width="460px">-->
+    </el-dialog>
 
-    <!--<div slot="footer" class="dialog-footer">-->
-    <!--<el-button @click="dialogFormVisible = false">-->
-    <!--取消-->
-    <!--</el-button>-->
-    <!---->
-    <!--</div>-->
-    <!--</el-dialog>-->
+    <el-dialog
+      title="更新中"
+      :visible.sync="dialogVisible"
+      width="500px"
+      :before-close="handleClose">
+      <el-slider v-model="uploadProgress" :show-tooltip="false" style="width: 430px"></el-slider>
+      <span class="progress-value">{{uploadProgress}}%</span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getList, addUser, editUser, deleteUser, exportFlie } from '@/api/dataManage/data'
+  import { getDBList, exportFlie, importLib } from '@/api/fingerprint'
   import { getPartners, getMini } from '@/api/partner'
   import { getAllMini, getBindList } from '@/api/dataManage/mini'
   import { searchType } from '@/api/dataManage/type'
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-  import locImg from '@/assets/custom-theme/loc.png'
   // import * as creeper from '@/utils/mapbox-gl'
 
   export default {
@@ -284,10 +176,12 @@
         boxs: {},
         imageUrl: '',
         showSelect: false,
+        uploadProgress: 0,
         listQuery: {
           page: 0,
           pageSize: 10,
           partnerName: '',
+          name: '',
           startTime: null,
           endTime: null,
           programName: ''
@@ -330,6 +224,7 @@
         },
         dialogStatus: '添加',
         dialogFormVisible: false,
+        dialogVisible: false,
         roles: [],
         partners: [],
         partnersMini: [],
@@ -349,7 +244,7 @@
       },
       async getList() {
         this.listLoading = false
-        const res = await getList(this.listQuery)
+        const res = await getDBList(this.listQuery)
         this.list = res.list
         this.total = res.total
       },
@@ -367,48 +262,24 @@
         })
         this.forceChange()
       },
-      chooseMap(id) {
-        creeper.CreeperConfig.token = 'bG9jYXRpb246YzFmNWZmZDg4ZWNkYzQyZDJlYzFkZjViYTU1OWU4MTA='
-        this.$nextTick(() => {
-          const map = new creeper.VectorMap('map-body', id, 'https://cmgis.parkbobo.com/')
-          map.on('click', (e) => {
-            this.userForm.longitudeAndLatitude = e.lngLat.lng + ',' + e.lngLat.lat
-            this.forceChange()
-            if (this.confMarker) {
-              this.confMarker.setLngLat([e.lngLat.lng, e.lngLat.lat])
-            } else {
-              const el = document.createElement('div')
-              el.style.width = '20px'
-              const img = document.createElement('img')
-              img.src = locImg
-              img.style.width = '20px'
-              el.appendChild(img)
-              this.confMarker = new creeper.Marker(el).setLngLat([e.lngLat.lng, e.lngLat.lat])
-                .addTo(map)
-            }
-          })
-        })
-        this.forceChange()
-      },
-      chooseType(id) {
-        searchType({ serviceType: id, mapId: this.userForm.mapId }).then(res => {
-          this.serviceTypeIds = res
-        })
-        this.forceChange()
-      },
-      handleDelete(data) {
-        deleteUser(data).then(() => {
-          this.getList()
+      chooseFile() {
+        const file = document.getElementById('upfile')
+        file.click()
+        file.addEventListener('change', () => {
+          const filename = file.files[0].name
+          this.userForm.filename = filename
+          this.userForm.classLib = file.files[0]
+          this.forceChange()
         })
       },
-      handleExport() {
-        exportFlie(this.listQuery).then(res => {
+      handleExport(e) {
+        exportFlie({ mapId: e.mapId }).then(res => {
           const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8' })
           const url = window.URL.createObjectURL(blob)
           const aLink = document.createElement('a')
           aLink.style.display = 'none'
           aLink.href = url
-          aLink.setAttribute('download', new Date().getTime() + '.xlsx')
+          aLink.setAttribute('download', new Date().getTime() + '.zip')
           document.body.appendChild(aLink)
           aLink.click()
           document.body.removeChild(aLink) // 下载完成移除元素
@@ -448,7 +319,7 @@
         // })
       },
       handleUpdate(row) {
-        console.log(row)
+        this.uploadProgress = 0
         this.userForm = Object.assign({}, row)
         this.userForm.partnerName = row.partners && row.partners[0].partnerId
         this.userForm.longitudeAndLatitude = row.longitude + ',' + row.latitude
@@ -466,7 +337,7 @@
             }
           })
         }
-        this.dialogStatus = '编辑'
+        this.dialogStatus = '更新'
         this.dialogFormVisible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
@@ -475,14 +346,17 @@
       submitForm() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            this.dialogStatus === '添加'
-              ? addUser(this.userForm).then(() => {
-                this.getList()
-              })
-              : editUser(this.userForm).then(() => {
-                this.getList()
-              })
+            this.dialogVisible = true
             this.dialogFormVisible = false
+            const formData = new FormData()
+            formData.append('mapId', this.userForm.mapId)
+            formData.append('classLib', this.userForm.classLib)
+            importLib(formData, (e) => {
+              this.uploadProgress = e
+              this.forceChange()
+            }).then(() => {
+              this.dialogVisible = false
+            })
           }
         })
       },
@@ -551,5 +425,28 @@
         color: rgba(39, 40, 40, 1);
       }
     }
+  }
+
+  .chooseFile {
+    position: absolute;
+    width: 75px;
+    height: 36px;
+    background: #409FFF;
+    left: 222px;
+    border-radius: 3px;
+    text-align: center;
+    color: white;
+  }
+
+  .file-input {
+    visibility: hidden;
+    position: absolute;
+  }
+
+  .progress-value {
+    position: absolute;
+    right: 15px;
+    top: 95px;
+    color: #999999;
   }
 </style>

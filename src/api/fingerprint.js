@@ -19,6 +19,19 @@ export function exportFlie(data) {
   })
 }
 
+export function importLib(data, cb) {
+  return request({
+    url: `/system/sysIbeaconClass/importLib`,
+    method: 'post',
+    data: data,
+    onUploadProgress: progressEvent => {
+      console.log('pro', progressEvent)
+      const complete = (progressEvent.loaded / progressEvent.total * 100 | 0)
+      cb(complete)
+    }
+  })
+}
+
 export function getTime(data) {
   return request({
     url: `/system/sysIbeaconClass/learnDate`,
@@ -45,7 +58,7 @@ export function deletePrints(data) {
 
 export function getDBList(data) {
   return request({
-    url: `/system/sysIbeaconClass/list`,
+    url: `/system/locMapFinger/list`,
     method: 'post',
     data: data
   })
